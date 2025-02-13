@@ -1,0 +1,141 @@
+# ===========================
+# Kubernetes Monitoring Stack Deployment
+# ===========================
+
+# Namespace for Monitoring Tools
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+# Deploy Prometheus for Metrics Collection
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-sa
+  namespace: monitoring
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  serviceAccountName: prometheus-sa
+  serviceMonitorSelector: {}
+  resources:
+    requests:
+      memory: 400Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+---
+# Deploy Grafana for Dashboards & Visualization
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-sa
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      serviceAccountName: grafana-sa
+      containers:
+        - name: grafana
+          image: grafana/grafana:latest
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: monitoring
+spec:
+  selector:
+    app: grafana
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+---
+# Deploy Kiali for Service Mesh Observability
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiali
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kiali
+  template:
+    metadata:
+      labels:
+        app: kiali
+    spec:
+      containers:
+        - name: kiali
+          image: quay.io/kiali/kiali:v1.50
+          ports:
+            - containerPort: 20001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiali-service
+  namespace: monitoring
+spec:
+  selector:
+    app: kiali
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 20001
+  type: LoadBalancer
+---
+# Deploy Celery Worker for Background Tasks
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+  namespace: monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      containers:
+        - name: celery
+          image: celery:latest
+          command: ["celery", "-A", "tasks", "worker", "--loglevel=info"]

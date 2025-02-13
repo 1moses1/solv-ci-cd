@@ -1,45 +1,44 @@
 # ===========================
-# GitHub Actions Workflow - Deploy to AWS EKS
+# GitHub Actions Workflow - Deploy to Existing AWS EKS
 # ===========================
 
-name: Deploy to AWS EKS  # Name of the workflow
+name: Deploy to AWS EKS  # Workflow name
 
 on:
-  push:
-    branches:
-      - main  # This workflow runs when changes are pushed to the main branch
-
   workflow_run:
-    workflows: ["Build and Push Docker Image"]  # Triggers deployment only after the build workflow completes successfully
+    workflows: ["Build and Push Docker Image"]  # Runs only after the CI workflow completes
     types:
       - completed
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # The deployment job runs on the latest Ubuntu runner
+    runs-on: ubuntu-latest  # GitHub-hosted runner
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3  
-        # Checks out the latest code from the repository
+        # Pulls the latest code from the repository
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1  
-        # Configures AWS CLI with credentials stored in GitHub Secrets
+        # Configures AWS CLI using GitHub Secrets
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # AWS Access Key (stored as a secret)
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # AWS Secret Key (stored as a secret)
-          aws-region: us-east-1  # AWS region where EKS is deployed
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Ensure this matches the pre-configured EKS region
 
-      - name: Update kubeconfig
+      - name: Update kubeconfig to use existing EKS cluster
         run: |
           aws eks update-kubeconfig --name solv-cluster --region us-east-1  
-          # Updates the kubeconfig file to connect to the EKS cluster
+          # Ensures `kubectl` commands target the existing cluster
 
-      - name: Deploy to Kubernetes
+      - name: Deploy Application to Kubernetes
         run: |
           kubectl apply -f helm/templates/deployment.yaml  
-          # Applies the deployment manifest to Kubernetes
-
           kubectl apply -f helm/templates/service.yaml  
-          # Applies the service manifest to Kubernetes
+          # Deploys the application to the existing EKS cluster
+
+      - name: Deploy Monitoring Tools
+        run: |
+          kubectl apply -f helm/templates/monitoring.yaml  
+          # Deploys observability tools (Prometheus, Grafana, Kiali, Celery) into EKS
