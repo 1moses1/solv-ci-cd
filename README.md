@@ -56,7 +56,7 @@ aws eks update-kubeconfig --name solv-cluster --region us-east-1
 ```bash
 kubectl get nodes
 ```
-***✅ You should see worker nodes running.*
+**✅ You should see worker nodes running.**
 
 ### 5️⃣ Deploy Application to EKS using Helm
 ```bash
