@@ -1,12 +1,19 @@
+# ===========================
+# Kubernetes Service for SOLV Application
+# ===========================
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: solv-app-service
+  name: solv-app-service  # Name of the Kubernetes Service
+
 spec:
   selector:
-    app: solv-app
-  type: {{ .Values.service.type }}
+    app: solv-app  # This service targets pods with the label "app: solv-app"
+
+  type: {{ .Values.service.type }}  # Defines the type of service (LoadBalancer, ClusterIP, NodePort)
+
   ports:
-    - protocol: TCP
-      port: {{ .Values.service.port }}
-      targetPort: 80
+    - protocol: TCP  # Protocol used for communication (TCP)
+      port: {{ .Values.service.port }}  # External port (defined in values.yaml)
+      targetPort: 80  # The port on the container where traffic is forwarded

@@ -1,17 +1,29 @@
-replicaCount: 2
+# ===========================
+# Helm Values Configuration for SOLV Application
+# ===========================
+
+# Number of pod replicas to deploy
+replicaCount: 2  
 
 image:
-  repository: ${{ secrets.DOCKERHUB_USERNAME }}/solv-app
-  tag: "latest"
+  repository: ${{ secrets.DOCKERHUB_USERNAME }}/solv-app  
+  # DockerHub repository where the container image is stored
+
+  tag: "latest"  
+  # The tag of the container image to be deployed (e.g., "latest" or a specific version)
 
 service:
-  type: LoadBalancer
-  port: 80
+  type: LoadBalancer  
+  # Service type for exposing the application (LoadBalancer, ClusterIP, or NodePort)
+
+  port: 80  
+  # External port the service will be exposed on
 
 resources:
   limits:
-    cpu: 500m
-    memory: 512Mi
+    cpu: 500m      # Maximum CPU the container can use
+    memory: 512Mi  # Maximum memory the container can use
+
   requests:
-    cpu: 250m
-    memory: 256Mi
+    cpu: 250m      # Minimum CPU request to guarantee resources
+    memory: 256Mi  # Minimum memory request to guarantee resources

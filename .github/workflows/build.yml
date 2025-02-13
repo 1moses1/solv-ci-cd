@@ -1,25 +1,34 @@
-name: Build and Push Docker Image
+# ===========================
+# GitHub Actions Workflow - Build & Push Docker Image
+# ===========================
+
+name: Build and Push Docker Image  # Name of the workflow
 
 on:
   push:
     branches:
-      - main
+      - main  # This workflow triggers only when changes are pushed to the main branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # The job runs on the latest Ubuntu runner provided by GitHub
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  
+        # Checks out the latest code from the repository
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v2  
+        # Logs in to DockerHub using credentials stored in GitHub Secrets
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}  # DockerHub username (stored as a secret)
+          password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}  # DockerHub access token (stored as a secret)
 
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/solv-app:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/solv-app:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/solv-app:latest .  
+          # Builds the Docker image and tags it as "latest"
+
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/solv-app:latest  
+          # Pushes the Docker image to DockerHub

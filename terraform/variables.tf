@@ -1,15 +1,23 @@
+# ===========================
+# Terraform Variables for AWS EKS
+# ===========================
+
+# Define the AWS region where the infrastructure will be deployed
 variable "region" {
-  description = "AWS region"
+  description = "AWS region where the EKS cluster will be provisioned"
   default     = "us-east-1"
 }
 
+# Name of the EKS cluster
 variable "cluster_name" {
-  description = "EKS Cluster Name"
+  description = "Name assigned to the AWS EKS cluster"
   default     = "solv-cluster"
 }
 
-variable "availability_zones" {
-  description = "List of availability zones for subnets"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
+# Specify the AWS Availability Zone for the deployment
+# Since the requirement states a Single AZ, we use only one AZ.
+variable "availability_zone" {
+  description = "AWS Availability Zone for the EKS cluster deployment"
+  type        = string
+  default     = "us-east-1a"
 }
